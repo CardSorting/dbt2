@@ -3,6 +3,7 @@ import { DiaryEntry } from '../../../domain/diary/entities/DiaryEntry';
 /**
  * DiaryEntryDto
  * Data Transfer Object for diary entries
+ * Used for transferring diary data between layers
  */
 export class DiaryEntryDto {
   id!: string;
