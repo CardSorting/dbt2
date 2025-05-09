@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { StyleSheet, ScrollView, TouchableOpacity, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, ScrollView, TouchableOpacity, TextInput, View, ActivityIndicator } from 'react-native';
 import { Stack } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { observer } from 'mobx-react-lite';
 
 import { Text } from '@/components/ui/Text';
 import { Card } from '@/components/ui/Card';
@@ -11,58 +11,23 @@ import { Header } from '@/components/ui/Header';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { borders, shadows, spacing } from '@/constants/DesignTokens';
+import { useDiaryViewModel } from '../hooks/useDiaryViewModel';
+import { DiaryEntryDto } from '@/src/application/diary/dto/DiaryEntryDto';
 
-// Define types for our data
-interface Emotion {
-  name: string;
-  intensity: number;
-}
-
-interface Urge {
-  name: string;
-  intensity: number;
-  acted: boolean;
-}
-
-interface DiaryEntry {
-  date: string;
-  emotions: Emotion[];
-  urges: Urge[];
-  skillsUsed: string[];
-  notes: string;
-}
-
-// Mock data for demonstration
-const mockEntries: DiaryEntry[] = [
-  { 
-    date: '2025-05-08', 
-    emotions: [
-      { name: 'Anxiety', intensity: 7 },
-      { name: 'Sadness', intensity: 4 }
-    ],
-    urges: [
-      { name: 'Self-harm', intensity: 3, acted: false }
-    ],
-    skillsUsed: ['Mindfulness', 'Distress Tolerance'],
-    notes: 'Difficult day at work, but used skills to cope.'
-  },
-  { 
-    date: '2025-05-07', 
-    emotions: [
-      { name: 'Joy', intensity: 6 },
-      { name: 'Contentment', intensity: 5 }
-    ],
-    urges: [],
-    skillsUsed: ['Mindfulness'],
-    notes: 'Good day overall. Practiced mindfulness during my morning walk.'
-  }
-];
-
-export default function DiaryScreen() {
+/**
+ * DiaryScreen component
+ * Screen for viewing and creating diary entries
+ */
+const DiaryScreen = observer(() => {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
   const [activeTab, setActiveTab] = useState('today');
-
+  const viewModel = useDiaryViewModel();
+  
+  useEffect(() => {
+    viewModel.loadEntries();
+  }, []);
+  
   return (
     <Container>
       <Stack.Screen options={{ headerShown: false }} />
@@ -112,30 +77,63 @@ export default function DiaryScreen() {
         </TouchableOpacity>
       </View>
 
-      {activeTab === 'today' ? (
-        <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
-          <DiaryEntryForm colors={colors} />
-        </ScrollView>
-      ) : (
-        <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
-          <DiaryHistory entries={mockEntries} colors={colors} />
-        </ScrollView>
+      {viewModel.isLoading && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={colors.tint} />
+        </View>
+      )}
+
+      {viewModel.error && (
+        <View style={styles.errorContainer}>
+          <Text color={colors.error}>{viewModel.error}</Text>
+        </View>
+      )}
+
+      {!viewModel.isLoading && !viewModel.error && (
+        activeTab === 'today' ? (
+          <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
+            <DiaryEntryForm 
+              colors={colors} 
+              onSave={(emotions, urges, skills, notes) => 
+                viewModel.saveDiaryEntry(emotions, urges, skills, notes)
+              }
+              isLoading={viewModel.isLoading}
+            />
+          </ScrollView>
+        ) : (
+          <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.scrollContent}>
+            <DiaryHistory 
+              entries={viewModel.diaryEntries} 
+              colors={colors} 
+            />
+          </ScrollView>
+        )
       )}
     </Container>
   );
-}
+});
 
 interface FormProps {
   colors: any;
+  onSave: (
+    emotions: { name: string, intensity: number }[],
+    urges: { name: string, intensity: number, acted: boolean }[],
+    skillsUsed: string[],
+    notes: string
+  ) => void;
+  isLoading: boolean;
 }
 
-function DiaryEntryForm({ colors }: FormProps) {
+function DiaryEntryForm({ colors, onSave, isLoading }: FormProps) {
   const emotionOptions = ['Joy', 'Sadness', 'Anger', 'Fear', 'Shame', 'Love', 'Anxiety', 'Contentment'];
   const urgeOptions = ['Self-harm', 'Substance use', 'Binge eating', 'Isolation'];
   const skillOptions = ['Mindfulness', 'Distress Tolerance', 'Emotion Regulation', 'Interpersonal Effectiveness'];
   
   const [selectedEmotions, setSelectedEmotions] = useState<string[]>([]);
+  const [emotionIntensities, setEmotionIntensities] = useState<Record<string, number>>({});
   const [selectedUrges, setSelectedUrges] = useState<string[]>([]);
+  const [urgeIntensities, setUrgeIntensities] = useState<Record<string, number>>({});
+  const [urgeActed, setUrgeActed] = useState<Record<string, boolean>>({});
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
 
@@ -144,6 +142,9 @@ function DiaryEntryForm({ colors }: FormProps) {
       setSelectedEmotions(selectedEmotions.filter(e => e !== emotion));
     } else {
       setSelectedEmotions([...selectedEmotions, emotion]);
+      if (!emotionIntensities[emotion]) {
+        setEmotionIntensities({...emotionIntensities, [emotion]: 5});
+      }
     }
   };
 
@@ -152,6 +153,10 @@ function DiaryEntryForm({ colors }: FormProps) {
       setSelectedUrges(selectedUrges.filter(u => u !== urge));
     } else {
       setSelectedUrges([...selectedUrges, urge]);
+      if (!urgeIntensities[urge]) {
+        setUrgeIntensities({...urgeIntensities, [urge]: 5});
+        setUrgeActed({...urgeActed, [urge]: false});
+      }
     }
   };
 
@@ -173,6 +178,21 @@ function DiaryEntryForm({ colors }: FormProps) {
       case 'love': return colors.emotions.love;
       default: return colors.tint;
     }
+  };
+
+  const handleSave = () => {
+    const emotions = selectedEmotions.map(name => ({
+      name,
+      intensity: emotionIntensities[name] || 5
+    }));
+    
+    const urges = selectedUrges.map(name => ({
+      name,
+      intensity: urgeIntensities[name] || 5,
+      acted: urgeActed[name] || false
+    }));
+    
+    onSave(emotions, urges, selectedSkills, notes);
   };
 
   return (
@@ -286,12 +306,10 @@ function DiaryEntryForm({ colors }: FormProps) {
 
         <Button 
           title="Save Entry"
-          onPress={() => {
-            // In a real app, this would save the entry
-            alert('Entry saved!');
-          }}
+          onPress={handleSave}
           iconRight="save-outline"
           style={styles.saveButton}
+          loading={isLoading}
         />
       </Card>
     </Column>
@@ -299,7 +317,7 @@ function DiaryEntryForm({ colors }: FormProps) {
 }
 
 interface HistoryProps {
-  entries: DiaryEntry[];
+  entries: DiaryEntryDto[];
   colors: any;
 }
 
@@ -308,62 +326,68 @@ function DiaryHistory({ entries, colors }: HistoryProps) {
     <Column style={styles.historyContainer}>
       <Text variant="h3" style={styles.historyTitle}>Your Diary Entries</Text>
       
-      {entries.map((entry, index) => (
-        <Card 
-          key={index} 
-          style={styles.entryCard}
-          variant="elevated"
-        >
-          <Column style={styles.entryHeader}>
-            <Text variant="h4">{formatDate(entry.date)}</Text>
-          </Column>
-          
-          <Column style={styles.entrySection}>
-            <Text variant="bodyBold" style={styles.sectionLabel}>Emotions:</Text>
-            <Column style={styles.emotionsList}>
-              {entry.emotions.map((emotion: Emotion, i: number) => (
-                <Row key={i} style={styles.emotionItem}>
-                  <View 
-                    style={[
-                      styles.emotionDot, 
-                      { backgroundColor: getEmotionColor(emotion.name, colors) }
-                    ]} 
-                  />
-                  <Text>
-                    {emotion.name} ({emotion.intensity}/10)
-                  </Text>
-                </Row>
-              ))}
+      {entries.length === 0 ? (
+        <Card style={styles.emptyStateCard}>
+          <Text style={styles.emptyStateText}>No diary entries yet. Start tracking your emotions and skills by creating a new entry.</Text>
+        </Card>
+      ) : (
+        entries.map((entry, index) => (
+          <Card 
+            key={index} 
+            style={styles.entryCard}
+            variant="elevated"
+          >
+            <Column style={styles.entryHeader}>
+              <Text variant="h4">{formatDate(entry.date)}</Text>
             </Column>
-          </Column>
-          
-          {entry.urges.length > 0 && (
+            
             <Column style={styles.entrySection}>
-              <Text variant="bodyBold" style={styles.sectionLabel}>Urges:</Text>
+              <Text variant="bodyBold" style={styles.sectionLabel}>Emotions:</Text>
               <Column style={styles.emotionsList}>
-                {entry.urges.map((urge: Urge, i: number) => (
+                {entry.emotions.map((emotion, i) => (
                   <Row key={i} style={styles.emotionItem}>
-                    <View style={[styles.emotionDot, { backgroundColor: colors.error }]} />
+                    <View 
+                      style={[
+                        styles.emotionDot, 
+                        { backgroundColor: getEmotionColor(emotion.name, colors) }
+                      ]} 
+                    />
                     <Text>
-                      {urge.name} ({urge.intensity}/10) {urge.acted ? '✓' : '✗'}
+                      {emotion.name} ({emotion.intensity}/10)
                     </Text>
                   </Row>
                 ))}
               </Column>
             </Column>
-          )}
-          
-          <Column style={styles.entrySection}>
-            <Text variant="bodyBold" style={styles.sectionLabel}>Skills Used:</Text>
-            <Text>{entry.skillsUsed.join(', ')}</Text>
-          </Column>
-          
-          <Column style={styles.entrySection}>
-            <Text variant="bodyBold" style={styles.sectionLabel}>Notes:</Text>
-            <Text>{entry.notes}</Text>
-          </Column>
-        </Card>
-      ))}
+            
+            {entry.urges.length > 0 && (
+              <Column style={styles.entrySection}>
+                <Text variant="bodyBold" style={styles.sectionLabel}>Urges:</Text>
+                <Column style={styles.emotionsList}>
+                  {entry.urges.map((urge, i) => (
+                    <Row key={i} style={styles.emotionItem}>
+                      <View style={[styles.emotionDot, { backgroundColor: colors.error }]} />
+                      <Text>
+                        {urge.name} ({urge.intensity}/10) {urge.acted ? '✓' : '✗'}
+                      </Text>
+                    </Row>
+                  ))}
+                </Column>
+              </Column>
+            )}
+            
+            <Column style={styles.entrySection}>
+              <Text variant="bodyBold" style={styles.sectionLabel}>Skills Used:</Text>
+              <Text>{entry.skillsUsed.join(', ')}</Text>
+            </Column>
+            
+            <Column style={styles.entrySection}>
+              <Text variant="bodyBold" style={styles.sectionLabel}>Notes:</Text>
+              <Text>{entry.notes}</Text>
+            </Column>
+          </Card>
+        ))
+      )}
     </Column>
   );
 }
@@ -490,4 +514,24 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginRight: spacing.xs,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    padding: spacing.md,
+    alignItems: 'center',
+  },
+  emptyStateCard: {
+    padding: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyStateText: {
+    textAlign: 'center',
+    opacity: 0.7,
+  },
 });
+
+export default DiaryScreen;

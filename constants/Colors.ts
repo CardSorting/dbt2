@@ -3,65 +3,177 @@
  * Using a calming color palette that promotes emotional well-being
  */
 
-// Primary colors
-const primaryLight = '#5B9AA0'; // Calming teal
-const primaryDark = '#81C3D7';  // Soft blue
+// Primary palette
+const primary = {
+  50: '#E6F3F5',
+  100: '#CCE7EB',
+  200: '#B3DBE1',
+  300: '#99CFD7',
+  400: '#80C3CD',
+  500: '#5B9AA0', // Primary color - Calming teal
+  600: '#4A7B80',
+  700: '#385C60',
+  800: '#273E40',
+  900: '#151F20',
+};
 
-// Secondary colors
-const secondaryLight = '#7A9E7E'; // Gentle green
-const secondaryDark = '#A3C9A8';  // Mint green
+// Secondary palette
+const secondary = {
+  50: '#EFF5F0',
+  100: '#DFEBE1',
+  200: '#CFE1D2',
+  300: '#BFD7C3',
+  400: '#AFCDB4',
+  500: '#7A9E7E', // Secondary color - Gentle green
+  600: '#627E65',
+  700: '#495F4C',
+  800: '#313F32',
+  900: '#182019',
+};
 
-export const Colors = {
+// Neutral palette
+const neutral = {
+  50: '#F8F9FA', // Light background
+  100: '#F1F3F5',
+  200: '#E9ECEF',
+  300: '#DEE2E6',
+  400: '#CED4DA',
+  500: '#ADB5BD',
+  600: '#6C757D',
+  700: '#495057',
+  800: '#343A40',
+  900: '#212529',
+  950: '#1E2A38', // Dark background
+};
+
+// Semantic colors
+const semantic = {
+  // Success colors
+  success: {
+    light: '#66A182', // Soft green
+    dark: '#8ECAA6',  // Muted green
+  },
+  // Error colors
+  error: {
+    light: '#D76666', // Soft red
+    dark: '#E88E8E',  // Muted red
+  },
+  // Warning colors
+  warning: {
+    light: '#E6C86E', // Soft yellow
+    dark: '#F0D898',  // Muted yellow
+  },
+  // Info colors
+  info: {
+    light: '#6E97B8', // Soft blue
+    dark: '#8FB6D9',  // Muted blue
+  },
+};
+
+// Emotion colors
+const emotions = {
   light: {
-    text: '#2D3E4E',           // Dark blue-gray
-    background: '#F8F9FA',     // Off-white
-    tint: primaryLight,
-    icon: '#6E8894',           // Muted blue-gray
-    tabIconDefault: '#6E8894', 
-    tabIconSelected: primaryLight,
-    
-    // Additional colors for the app
-    card: '#FFFFFF',
-    border: '#E1E5EA',
-    error: '#D76666',          // Soft red
-    success: '#66A182',        // Soft green
-    warning: '#E6C86E',        // Soft yellow
-    info: '#6E97B8',           // Soft blue
-    
-    // Emotion colors
-    emotions: {
-      joy: '#FFCB77',          // Warm yellow
-      sadness: '#7192BE',      // Soft blue
-      anger: '#E07A5F',        // Soft red
-      fear: '#9381FF',         // Soft purple
-      shame: '#B67162',        // Terracotta
-      love: '#F4ACB7',         // Soft pink
-    }
+    joy: '#FFCB77',    // Warm yellow
+    sadness: '#7192BE', // Soft blue
+    anger: '#E07A5F',   // Soft red
+    fear: '#9381FF',    // Soft purple
+    shame: '#B67162',   // Terracotta
+    love: '#F4ACB7',    // Soft pink
   },
   dark: {
-    text: '#E9ECEF',           // Off-white
-    background: '#1E2A38',     // Dark blue-gray
-    tint: primaryDark,
-    icon: '#A2B5C1',           // Light blue-gray
-    tabIconDefault: '#A2B5C1',
-    tabIconSelected: primaryDark,
+    joy: '#FFD88F',     // Warm yellow (lighter)
+    sadness: '#8EAAD7', // Soft blue (lighter)
+    anger: '#EE9B85',   // Soft red (lighter)
+    fear: '#AFA3FF',    // Soft purple (lighter)
+    shame: '#D08E7F',   // Terracotta (lighter)
+    love: '#F7C2CB',    // Soft pink (lighter)
+  },
+};
+
+// Surface colors (for components)
+const surface = {
+  light: {
+    primary: '#FFFFFF',      // Card background
+    secondary: '#F8F9FA',    // Secondary surface
+    tertiary: '#F1F3F5',     // Tertiary surface
+  },
+  dark: {
+    primary: '#2C3A4A',      // Card background
+    secondary: '#343A40',    // Secondary surface
+    tertiary: '#495057',     // Tertiary surface
+  },
+};
+
+// Export the complete color system
+export const Colors = {
+  // Theme-specific colors
+  light: {
+    // Base colors
+    text: neutral[800],
+    background: neutral[50],
+    tint: primary[500],
+    icon: neutral[600],
+    tabIconDefault: neutral[600],
+    tabIconSelected: primary[500],
     
-    // Additional colors for the app
-    card: '#2C3A4A',           // Slightly lighter than background
-    border: '#3E4C5C',         // Dark border
-    error: '#E88E8E',          // Muted red
-    success: '#8ECAA6',        // Muted green
-    warning: '#F0D898',        // Muted yellow
-    info: '#8FB6D9',           // Muted blue
+    // Component colors
+    card: surface.light.primary,
+    border: neutral[300],
+    
+    // Semantic colors
+    error: semantic.error.light,
+    success: semantic.success.light,
+    warning: semantic.warning.light,
+    info: semantic.info.light,
     
     // Emotion colors
-    emotions: {
-      joy: '#FFD88F',          // Warm yellow (lighter)
-      sadness: '#8EAAD7',      // Soft blue (lighter)
-      anger: '#EE9B85',        // Soft red (lighter)
-      fear: '#AFA3FF',         // Soft purple (lighter)
-      shame: '#D08E7F',        // Terracotta (lighter)
-      love: '#F7C2CB',         // Soft pink (lighter)
-    }
+    emotions: emotions.light,
+    
+    // Surface colors
+    surface: surface.light,
+    
+    // Raw palettes for custom usage
+    primary,
+    secondary,
+    neutral,
+  },
+  dark: {
+    // Base colors
+    text: neutral[200],
+    background: neutral[950],
+    tint: primary[400],
+    icon: neutral[400],
+    tabIconDefault: neutral[400],
+    tabIconSelected: primary[400],
+    
+    // Component colors
+    card: surface.dark.primary,
+    border: neutral[700],
+    
+    // Semantic colors
+    error: semantic.error.dark,
+    success: semantic.success.dark,
+    warning: semantic.warning.dark,
+    info: semantic.info.dark,
+    
+    // Emotion colors
+    emotions: emotions.dark,
+    
+    // Surface colors
+    surface: surface.dark,
+    
+    // Raw palettes for custom usage
+    primary,
+    secondary,
+    neutral,
+  },
+  
+  // Theme-agnostic color palettes
+  palettes: {
+    primary,
+    secondary,
+    neutral,
+    semantic,
+    emotions,
   },
 };

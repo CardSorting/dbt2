@@ -1,135 +1,205 @@
 import { Image } from 'expo-image';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, ScrollView } from 'react-native';
 import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { Text } from '@/components/ui/Text';
+import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Container, Column, Row } from '@/components/ui/Container';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { borders, shadows, spacing } from '@/constants/DesignTokens';
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
 
-  const navigateTo = (screen: string) => {
+  const navigateTo = (screen: '/(tabs)/diary' | '/(tabs)/skills' | '/(tabs)/exercises' | '/(tabs)/progress') => {
     router.push(screen);
   };
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ 
-        light: Colors.light.tint, 
-        dark: Colors.dark.tint 
-      }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.headerImage}
+    <Container>
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
+        <Column style={styles.header}>
+          <Image
+            source={require('@/assets/images/partial-react-logo.png')}
+            style={styles.headerImage}
+            contentFit="cover"
+          />
+          <Column style={styles.headerContent}>
+            <Text variant="h1" align="center" color="#fff">
+              DBT Companion
+            </Text>
+            <Text variant="subtitle" align="center" color="#fff">
+              Your personal guide to mindfulness and emotional well-being
+            </Text>
+          </Column>
+        </Column>
+
+        {/* Introduction */}
+        <Card style={styles.introCard}>
+          <Text variant="bodyBold" align="center">
+            Welcome to your DBT journey
+          </Text>
+          <Text align="center" style={styles.introText}>
+            This app provides tools and resources to help you practice Dialectical Behavior Therapy skills in your daily life.
+          </Text>
+        </Card>
+
+        {/* Feature Cards */}
+        <Column style={styles.featureCardsContainer}>
+          <FeatureCard
+            title="Diary Cards"
+            description="Track your emotions, urges, and behaviors daily"
+            icon="book"
+            color={colors.emotions.sadness}
+            onPress={() => navigateTo('/(tabs)/diary')}
+          />
+
+          <FeatureCard
+            title="Skills Library"
+            description="Learn and reference DBT skills from all modules"
+            icon="bulb"
+            color={colors.emotions.joy}
+            onPress={() => navigateTo('/(tabs)/skills')}
+          />
+
+          <FeatureCard
+            title="Practice Exercises"
+            description="Guided exercises to help you practice DBT skills"
+            icon="fitness"
+            color={colors.emotions.love}
+            onPress={() => navigateTo('/(tabs)/exercises')}
+          />
+
+          <FeatureCard
+            title="Progress Tracking"
+            description="Visualize your journey and track your improvement"
+            icon="trending-up"
+            color={colors.emotions.fear}
+            onPress={() => navigateTo('/(tabs)/progress')}
+          />
+        </Column>
+
+        {/* Quote */}
+        <Card variant="outlined" style={styles.quoteCard}>
+          <Text style={styles.quote} align="center">
+            "You can be in control of your emotions, rather than having your emotions control you."
+          </Text>
+          <Text style={styles.quoteAuthor} align="center">
+            — Dr. Marsha Linehan, Creator of DBT
+          </Text>
+        </Card>
+
+        {/* Get Started Button */}
+        <Button
+          title="Start Your Practice Today"
+          onPress={() => navigateTo('/(tabs)/diary')}
+          iconRight="arrow-forward"
+          style={styles.getStartedButton}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome to DBT Companion</ThemedText>
-      </ThemedView>
+      </ScrollView>
+    </Container>
+  );
+}
 
-      <ThemedView style={styles.introContainer}>
-        <ThemedText style={styles.introText}>
-          Your personal guide to Dialectical Behavior Therapy skills and practice
-        </ThemedText>
-      </ThemedView>
+interface FeatureCardProps {
+  title: string;
+  description: string;
+  icon: keyof typeof Ionicons.glyphMap;
+  color: string;
+  onPress: () => void;
+}
 
-      <ThemedView style={styles.cardContainer}>
-        <TouchableOpacity 
-          style={[styles.card, { backgroundColor: colors.card }]} 
-          onPress={() => navigateTo('/diary')}
-        >
-          <ThemedText type="subtitle">Diary Cards</ThemedText>
-          <ThemedText>Track your emotions, urges, and behaviors daily</ThemedText>
-        </TouchableOpacity>
+function FeatureCard({ title, description, icon, color, onPress }: FeatureCardProps) {
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
 
-        <TouchableOpacity 
-          style={[styles.card, { backgroundColor: colors.card }]} 
-          onPress={() => navigateTo('/skills')}
-        >
-          <ThemedText type="subtitle">Skills Library</ThemedText>
-          <ThemedText>Learn and reference DBT skills from all modules</ThemedText>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.card, { backgroundColor: colors.card }]} 
-          onPress={() => navigateTo('/exercises')}
-        >
-          <ThemedText type="subtitle">Practice Exercises</ThemedText>
-          <ThemedText>Guided exercises to help you practice DBT skills</ThemedText>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={[styles.card, { backgroundColor: colors.card }]} 
-          onPress={() => navigateTo('/progress')}
-        >
-          <ThemedText type="subtitle">Progress Tracking</ThemedText>
-          <ThemedText>Visualize your journey and track your improvement</ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
-
-      <ThemedView style={styles.quoteContainer}>
-        <ThemedText style={styles.quote}>
-          "You can be in control of your emotions, rather than having your emotions control you."
-        </ThemedText>
-        <ThemedText style={styles.quoteAuthor}>— Dr. Marsha Linehan, Creator of DBT</ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
+  return (
+    <Card onPress={onPress} style={styles.featureCard} variant="elevated">
+      <Row>
+        <Column style={[styles.iconContainer, { backgroundColor: color + '20' }]}>
+          <Ionicons name={icon} size={24} color={color} />
+        </Column>
+        <Column style={styles.featureContent}>
+          <Text variant="h4">{title}</Text>
+          <Text variant="bodySmall">{description}</Text>
+        </Column>
+      </Row>
+    </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    alignItems: 'center',
-    marginBottom: 16,
+  scrollContent: {
+    paddingBottom: spacing.xxl,
   },
-  introContainer: {
-    marginBottom: 24,
+  header: {
+    height: 220,
+    width: '100%',
+    backgroundColor: Colors.light.primary[500],
+    justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  headerImage: {
+    height: 220,
+    width: '100%',
+    position: 'absolute',
+    opacity: 0.2,
+  },
+  headerContent: {
+    padding: spacing.lg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  introCard: {
+    marginTop: -spacing.lg,
+    marginHorizontal: spacing.md,
+    padding: spacing.md,
+    ...shadows.light.md,
   },
   introText: {
-    textAlign: 'center',
-    fontSize: 16,
-    paddingHorizontal: 16,
+    marginTop: spacing.sm,
   },
-  cardContainer: {
-    gap: 16,
-    marginBottom: 24,
+  featureCardsContainer: {
+    padding: spacing.md,
+    gap: spacing.md,
   },
-  card: {
-    padding: 16,
-    borderRadius: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  featureCard: {
+    padding: spacing.md,
   },
-  quoteContainer: {
-    marginTop: 8,
-    marginBottom: 32,
-    paddingHorizontal: 16,
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: borders.radius.md,
+    justifyContent: 'center',
     alignItems: 'center',
+    marginRight: spacing.md,
+  },
+  featureContent: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  quoteCard: {
+    marginHorizontal: spacing.md,
+    padding: spacing.md,
+    marginTop: spacing.md,
   },
   quote: {
     fontStyle: 'italic',
-    textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: spacing.sm,
   },
   quoteAuthor: {
-    textAlign: 'center',
     opacity: 0.7,
   },
-  headerImage: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-    opacity: 0.6,
+  getStartedButton: {
+    marginHorizontal: spacing.md,
+    marginTop: spacing.lg,
   },
 });

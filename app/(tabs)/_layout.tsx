@@ -1,10 +1,9 @@
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
-import { HapticTab } from '@/components/HapticTab';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-import TabBarBackground from '@/components/ui/TabBarBackground';
+import { TabBar } from '@/components/ui/TabBar';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -13,52 +12,48 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      tabBar={(props) => <TabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
-        tabBarButton: HapticTab,
-        tabBarBackground: TabBarBackground,
-        tabBarStyle: Platform.select({
-          ios: {
-            // Use a transparent background on iOS to show the blur effect
-            position: 'absolute',
-          },
-          default: {},
-        }),
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          tabBarIcon: ({ focused, color }) => 
+            focused ? 'home' : 'home-outline',
         }}
       />
       <Tabs.Screen
         name="diary"
         options={{
           title: 'Diary',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="book.fill" color={color} />,
+          tabBarIcon: ({ focused, color }) => 
+            focused ? 'book' : 'book-outline',
         }}
       />
       <Tabs.Screen
         name="skills"
         options={{
           title: 'Skills',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="lightbulb.fill" color={color} />,
+          tabBarIcon: ({ focused, color }) => 
+            focused ? 'bulb' : 'bulb-outline',
         }}
       />
       <Tabs.Screen
         name="exercises"
         options={{
           title: 'Practice',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="figure.walk" color={color} />,
+          tabBarIcon: ({ focused, color }) => 
+            focused ? 'fitness' : 'fitness-outline',
         }}
       />
       <Tabs.Screen
         name="progress"
         options={{
           title: 'Progress',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="chart.line.uptrend.xyaxis" color={color} />,
+          tabBarIcon: ({ focused, color }) => 
+            focused ? 'trending-up' : 'trending-up-outline',
         }}
       />
     </Tabs>
