@@ -32,7 +32,21 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
       <View style={styles.tabsContainer}>
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
-          const label = options.title || route.name;
+          // Use shortened labels for specific routes
+          let label = options.title || route.name;
+          
+          // Map longer titles to shorter ones
+          switch (route.name) {
+            case 'diary':
+              label = 'Log';
+              break;
+            case 'exercises':
+              label = 'Train';
+              break;
+            case 'progress':
+              label = 'Stats';
+              break;
+          }
           
           // Get icon from options
           const iconName = getIconName(options, state.index === index);
@@ -47,15 +61,18 @@ export function TabBar({ state, descriptors, navigation }: BottomTabBarProps) {
                 tabBackgroundColor = colors.primary[100];
                 break;
               case 'diary':
+              case 'log':
                 tabBackgroundColor = colors.emotions.sadness + '20';
                 break;
               case 'skills':
                 tabBackgroundColor = colors.emotions.joy + '20';
                 break;
               case 'practice':
+              case 'train':
                 tabBackgroundColor = colors.emotions.love + '20';
                 break;
               case 'progress':
+              case 'stats':
                 tabBackgroundColor = colors.emotions.fear + '20';
                 break;
               default:
@@ -141,13 +158,16 @@ function getIconName(options: any, isFocused: boolean): string | undefined {
     case 'home':
       return isFocused ? 'home' : 'home-outline';
     case 'diary':
+    case 'log':
       return isFocused ? 'book' : 'book-outline';
     case 'skills':
       return isFocused ? 'bulb' : 'bulb-outline';
     case 'practice':
     case 'exercises':
+    case 'train':
       return isFocused ? 'fitness' : 'fitness-outline';
     case 'progress':
+    case 'stats':
       return isFocused ? 'trending-up' : 'trending-up-outline';
     case 'settings':
       return isFocused ? 'settings' : 'settings-outline';
@@ -185,16 +205,20 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
+    width: 40,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 2,
+    marginBottom: 4,
   },
   activeLabel: {
     fontWeight: '600',
+    maxWidth: 60,
+    textAlign: 'center',
   },
   inactiveLabel: {
     opacity: 0.7,
+    maxWidth: 60,
+    textAlign: 'center',
   },
 });

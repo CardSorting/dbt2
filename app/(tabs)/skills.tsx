@@ -25,6 +25,22 @@ interface SkillModule {
   skills: Skill[];
 }
 
+// Helper function to get shorter module names for buttons
+function getShortModuleName(moduleId: string): string {
+  switch (moduleId) {
+    case 'mindfulness':
+      return 'Mindful';
+    case 'distress-tolerance':
+      return 'Distress';
+    case 'emotion-regulation':
+      return 'Emotion';
+    case 'interpersonal-effectiveness':
+      return 'Social';
+    default:
+      return moduleId;
+  }
+}
+
 // Mock data for DBT skills
 const dbtModules: SkillModule[] = [
   {
@@ -276,7 +292,7 @@ export default function SkillsScreen() {
                   (selectedModule === module.id || !selectedModule) && { color: '#fff' }
                 ]}
               >
-                {module.name}
+                {getShortModuleName(module.id)}
               </ThemedText>
             </TouchableOpacity>
           ))}
@@ -427,6 +443,8 @@ const styles = StyleSheet.create({
   moduleButtonText: {
     fontSize: 14,
     fontWeight: '500',
+    maxWidth: 80,
+    textAlign: 'center',
   },
   scrollContainer: {
     flex: 1,
